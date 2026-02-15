@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Mail, Phone, Facebook, Twitter, Instagram, Linkedin, Github, Send } from 'lucide-react';
-import emailjs from "@emailjs/browser";
 import { toast } from "react-toastify";
 
 const Contact = () => {
@@ -9,52 +8,28 @@ const Contact = () => {
         Email: "",
         Message: "",
     });
-    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormSubmission((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = async (event: React.FormEvent) => {
+    const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
-        setIsSubmitting(true);
-        try {
-            await fetch(
-                "https://v1.nocodeapi.com/roastedtumor/google_sheets/CiCcXYKAWsnBEtVg?tabId=Sheet1",
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify([[formObject.Name, formObject.Email, formObject.Message, new Date().toLocaleString()]]),
-                }
-            );
 
-            const emailResponse = await emailjs.send(
-                "service_4yg13kr",
-                "template_3clu39h",
-                {
-                    from_name: formObject.Name,
-                    to_name: "Anirban Samaddar",
-                    message: formObject.Message,
-                    reply_to: formObject.Email,
-                    message_from_me: formObject.Name.toLowerCase().includes("shreyosi")
-                        ? "I love you too my baby love <3"
-                        : "Thanks for reaching out! I'll get back to you soon.",
-                    to_email: formObject.Email,
-                },
-                "9AgPLQJTQvAsZfxBD"
-            );
+        const subject = encodeURIComponent(`Portfolio Contact: ${formObject.Name}`);
+        const body = encodeURIComponent(
+            `Name: ${formObject.Name}\n` +
+            `Email: ${formObject.Email}\n\n` +
+            `Message:\n${formObject.Message}`
+        );
 
-            if (emailResponse.status === 200) {
-                toast.success("Message sent! I'll be in touch soon.", { theme: "dark" });
-                setFormSubmission({ Name: "", Email: "", Message: "" });
-            }
-        } catch (error) {
-            console.error("Error sending message:", error);
-            toast.error("Something went wrong. Please try again later.");
-        } finally {
-            setIsSubmitting(false);
-        }
+        const mailtoUrl = `mailto:anirbansamaddar07@gmail.com?subject=${subject}&body=${body}`;
+
+        window.open(mailtoUrl, '_blank');
+
+        toast.success("Opening your mail client...", { theme: "dark" });
+        setFormSubmission({ Name: "", Email: "", Message: "" });
     };
 
     const socialLinks = [
@@ -103,7 +78,8 @@ const Contact = () => {
                         </div>
 
                         <a
-                            href="https://drive.google.com/uc?id=1U6pnUug66hl9XBeceJ7gNMY9Q31jDqT1"
+                            href="/Anirban_CV_26_12_25.pdf"
+                            download
                             className="inline-block px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-blue-400 hover:text-white transition-all transform hover:scale-105"
                         >
                             Download CV
@@ -143,11 +119,10 @@ const Contact = () => {
                             ></textarea>
                             <button
                                 type="submit"
-                                disabled={isSubmitting}
-                                className="group flex items-center space-x-3 px-10 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-full hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all disabled:opacity-50"
+                                className="group flex items-center space-x-3 px-10 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-full hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all"
                             >
-                                <span>{isSubmitting ? 'Sending...' : 'Send Message'}</span>
-                                {!isSubmitting && <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />}
+                                <span>Send Message</span>
+                                <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                             </button>
                         </form>
                     </div>

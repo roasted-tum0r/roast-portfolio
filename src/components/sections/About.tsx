@@ -19,37 +19,37 @@ const About = () => {
             {
                 label: 'Modern Frontend Engineering',
                 shortLabel: 'Frontend',
-                value: 95,
+                value: 85,
                 desc: 'Expertise in React 19, TypeScript, and Vite architecting high-performance Single Page Applications (SPA) with MUI/DataGrid.'
             },
             {
                 label: 'State Management & Saga',
                 shortLabel: 'Redux/Saga',
-                value: 92,
+                value: 90,
                 desc: 'Advanced proficiency in Redux Toolkit and Redux Saga for handling complex, asynchronous application states.'
             },
             {
                 label: 'Backend & RESTful APIs',
                 shortLabel: 'Node/API',
-                value: 88,
+                value: 65,
                 desc: 'Designing robust REST APIs with Node.js, Express, and high-performance persistent caching layers using Redis.'
             },
             {
                 label: 'Cloud & Infrastructure',
                 shortLabel: 'Cloud/AWS',
-                value: 82,
+                value: 40,
                 desc: 'Integrating AWS S3, SQS, and third-party services like Google Maps and reCAPTCHA into scalable workflows.'
             },
             {
                 label: 'QA & Network Debugging',
                 shortLabel: 'QA/Debug',
-                value: 85,
+                value: 75,
                 desc: 'Expert-level debugging using Chrome DevTools and network inspection to ensure production-level code quality.'
             },
             {
                 label: 'System Architecture',
                 shortLabel: 'Arch/Design',
-                value: 80,
+                value: 35,
                 desc: 'Specializing in legacy refactoring, component-driven design, and building scalable system architectures for modern products.'
             },
         ],

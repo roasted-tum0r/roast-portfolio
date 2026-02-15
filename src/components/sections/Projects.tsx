@@ -1,17 +1,203 @@
 import { motion } from 'framer-motion';
-import { ExternalLink, Github, GitBranch, Star, Terminal } from 'lucide-react';
+import { ExternalLink, Github, GitBranch, Star, Terminal, Link2Off } from 'lucide-react';
 import { useGitHubData, type Repository } from '../../hooks/useGitHubData';
 
+const GitHubActivityTerminal = ({
+    events,
+    grid,
+    totalContributions,
+    loading,
+    eventPage,
+    totalEventPages,
+    nextEventPage,
+    prevEventPage
+}: {
+    events: any[],
+    grid: number[][],
+    totalContributions: number,
+    loading: boolean,
+    eventPage: number,
+    totalEventPages: number,
+    nextEventPage: () => void,
+    prevEventPage: () => void
+}) => {
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mt-20 p-8 rounded-[2rem] bg-white/5 border border-white/10 relative overflow-hidden group col-span-full"
+        >
+            <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">
+                <Github size={200} />
+            </div>
+
+            <div className="flex flex-col lg:grid lg:grid-cols-2 gap-16 relative z-10">
+                {/* Left: Dynamic Contribution Grid */}
+                <div className="space-y-6">
+                    <div className="flex items-center space-x-6 mb-2">
+                        <h3 className="text-xs font-mono font-bold text-blue-400 pascalcase tracking-[0.2em] flex items-center space-x-3">
+                            <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                            <span>{totalContributions.toLocaleString()} All-Time Contributions</span>
+                        </h3>
+                        <div className="flex items-center space-x-2 text-[10px] font-mono text-white/20 whitespace-nowrap">
+                            <span className="w-1 h-3 bg-white/10"></span>
+                            <span>Status: Real Time Sync</span>
+                        </div>
+                    </div>
+
+                    <div className="p-6 rounded-2xl bg-[#030303]/60 border border-white/5 font-mono overflow-x-auto scrollbar-hide relative group/grid">
+                        <div className="flex flex-col space-y-1.5 min-w-max">
+                            {grid.map((row, i) => (
+                                <div key={i} className="flex space-x-1.5">
+                                    {row.map((cell, j) => (
+                                        <div
+                                            key={j}
+                                            className={`w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-[2px] transition-all duration-700 
+                                                ${cell === 0 ? 'bg-white/[0.04]' :
+                                                    cell === 1 ? 'bg-blue-900/40' :
+                                                        cell === 2 ? 'bg-blue-600/60' :
+                                                            'bg-blue-400 shadow-[0_0_12px_rgba(96,165,250,0.4)]'}`}
+                                        />
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+                        <div className="mt-8 flex justify-between items-center text-[9px] text-white/30 pascalcase tracking-[0.1em]">
+                            <div className="flex flex-col">
+                                <span className="text-white/10 mb-1">Archive Scope</span>
+                                <span className="font-bold text-white/40">Historical Data Sync</span>
+                            </div>
+                            <div className="flex items-center space-x-2 bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+                                <span className="mr-2">Intensity:</span>
+                                <div className="w-2 h-2 rounded-sm bg-white/[0.04]"></div>
+                                <div className="w-2 h-2 rounded-sm bg-blue-900/40"></div>
+                                <div className="w-2 h-2 rounded-sm bg-blue-600/60"></div>
+                                <div className="w-2 h-2 rounded-sm bg-blue-400"></div>
+                            </div>
+                        </div>
+                        {/* Decorative Blue Bar at the bottom of the grid as per user image */}
+                        <div className="mt-6 w-full h-3.5 bg-blue-500/80 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.3)] animate-pulse"></div>
+                    </div>
+                </div>
+
+                {/* Right: Activity Timeline */}
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-xs font-mono font-bold text-blue-400 pascalcase tracking-[0.1em] flex items-center space-x-3">
+                            <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.5)]"></span>
+                            <span>Activity Timeline</span>
+                        </h3>
+                        <div className="flex items-center space-x-2 bg-white/5 p-1 rounded-lg border border-white/10">
+                            <button
+                                onClick={prevEventPage}
+                                disabled={loading || eventPage === 1}
+                                className="px-3 py-1 text-[9px] font-mono text-white/40 hover:text-white disabled:opacity-20 transition-all font-bold tracking-widest"
+                            >
+                                PREV
+                            </button>
+                            <span className="text-[9px] font-mono text-blue-500/60 px-2">PG_{eventPage.toString().padStart(2, '0')}</span>
+                            <button
+                                onClick={nextEventPage}
+                                disabled={loading || eventPage >= totalEventPages}
+                                className="px-3 py-1 text-[9px] font-mono text-white/40 hover:text-white disabled:opacity-20 transition-all font-bold tracking-widest"
+                            >
+                                NEXT
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="relative pl-10 space-y-4">
+                        {/* Vertical Timeline Line */}
+                        <div className="absolute left-[20px] top-4 bottom-4 w-[2px] bg-gradient-to-b from-blue-500/20 via-blue-500/10 to-transparent"></div>
+
+                        {loading ? (
+                            [1, 2, 3, 4].map(i => <div key={i} className="h-14 w-full bg-white/5 animate-pulse rounded-xl border border-white/5"></div>)
+                        ) : (
+                            events.map((event, i) => {
+                                const type = event.type.replace('Event', '');
+                                const repo = event.repo.name.split('/')[1] || event.repo.name;
+                                const date = new Date(event.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+                                let label = '';
+                                switch (type) {
+                                    case 'Push': label = 'Committed to'; break;
+                                    case 'Create': label = 'Initialized'; break;
+                                    case 'Watch': label = 'Starred'; break;
+                                    case 'PullRequest': label = 'PR Activity in'; break;
+                                    default: label = 'Active in';
+                                }
+
+                                return (
+                                    <motion.div
+                                        key={event.id}
+                                        initial={{ opacity: 0, x: 10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: i * 0.05 }}
+                                        className="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:border-blue-500/30 hover:bg-white/[0.04] transition-all group/item relative z-10"
+                                    >
+                                        {/* Connecting Node on the Line */}
+                                        <div className="absolute -left-[23px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] group-hover/item:scale-125 transition-transform z-20"></div>
+
+                                        <div className="flex items-center space-x-4">
+                                            <div className="w-8 h-8 rounded-lg bg-[#050505] border border-white/5 flex items-center justify-center text-blue-400 group-hover/item:text-blue-300 transition-colors shadow-lg">
+                                                <GitBranch size={14} />
+                                            </div>
+                                            <div className="flex flex-col max-w-[200px] md:max-w-[300px]">
+                                                <div className="flex items-center space-x-2">
+                                                    <span className="text-blue-500/60 font-mono text-[11px] font-bold pascalcase tracking-wider">{label}</span>
+                                                    <span className="text-white text-sm font-bold tracking-tight truncate">{repo}</span>
+                                                </div>
+                                                {event.displayMessage && (
+                                                    <span className="text-white/40 text-[10px] font-mono italic truncate mt-0.5 group-hover/item:text-white/60 transition-colors">
+                                                        "{event.displayMessage}"
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col items-end shrink-0">
+                                            <div className="flex items-center space-x-2">
+                                                <span className="text-[10px] font-mono text-white/30 pascalcase">{date}</span>
+                                                <span className="text-[10px] font-mono text-blue-400/40 font-bold">{event.displayTime}</span>
+                                            </div>
+                                            <div className="w-8 h-[2px] bg-blue-500/20 group-hover:w-12 transition-all mt-1"></div>
+                                        </div>
+                                    </motion.div>
+                                );
+                            })
+                        )}
+                    </div>
+                </div>
+            </div>
+        </motion.div>
+    );
+};
+
 const Projects = () => {
-    const { repos, languages, loading, page, nextPage, prevPage } = useGitHubData(3);
+    const {
+        repos,
+        languages,
+        events,
+        contributionGrid,
+        totalContributions,
+        loading,
+        eventsLoading,
+        page,
+        nextPage,
+        prevPage,
+        eventPage,
+        totalEventPages,
+        nextEventPage,
+        prevEventPage
+    } = useGitHubData(3);
 
     const featuredProjects = [
         {
             title: "Anandini's Exotica",
             desc: 'High-end E-commerce engine architected with a production-first mindset. Featuring complex state management and RESTful backend architecture.',
-            link: 'https://anandini-exotica.vercel.app/',
+            link: '#coming-soon',
             tags: ['React 19', 'Node.js', 'Redis', 'MUI'],
-            status: 'In Development'
+            status: 'Coming Soon'
         },
         {
             title: 'Open Sesame-Mail',
@@ -94,12 +280,13 @@ const Projects = () => {
                                 </div>
                                 <a
                                     href={project.link}
-                                    target="_blank"
+                                    target={project.status === 'Coming Soon' ? '_self' : '_blank'}
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center space-x-3 text-white font-bold hover:text-blue-400 transition-colors uppercase tracking-widest text-[10px] md:text-xs"
+                                    className={`inline-flex items-center space-x-3 font-bold transition-colors uppercase tracking-widest text-[10px] md:text-xs ${project.status === 'Coming Soon' ? 'text-white/20 cursor-not-allowed' : 'text-white hover:text-blue-400'}`}
+                                    onClick={(e) => project.status === 'Coming Soon' && e.preventDefault()}
                                 >
-                                    <span>Execute System</span>
-                                    <ExternalLink size={14} />
+                                    <span>{project.status === 'Coming Soon' ? 'Coming Soon' : 'Execute System'}</span>
+                                    {project.status === 'Coming Soon' ? <Link2Off size={14} /> : <ExternalLink size={14} />}
                                 </a>
                             </div>
                         </motion.div>
@@ -109,7 +296,7 @@ const Projects = () => {
                 {/* Git Activity & Language Footprint */}
                 <div className="grid lg:grid-cols-3 gap-16 items-start">
                     {/* Language proficiency footprint */}
-                    <div className="lg:col-span-1 space-y-8">
+                    <div id="footprint" className="lg:col-span-1 space-y-8">
                         <div className="p-8 rounded-3xl bg-white/5 border border-white/10 relative overflow-hidden group">
                             <div className="absolute top-0 right-0 p-4 opacity-10"><Terminal size={60} /></div>
                             <h3 className="text-xl font-black text-white mb-8 tracking-tighter pascalcase flex items-center space-x-2">
@@ -152,7 +339,7 @@ const Projects = () => {
                     </div>
 
                     {/* Repository Feed */}
-                    <div className="lg:col-span-2">
+                    <div id="repo-feed" className="lg:col-span-2">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                             <h3 className="text-xl font-black text-white tracking-tighter pascalcase flex items-center space-x-3">
                                 <Github size={20} className="text-blue-400" />
@@ -225,6 +412,18 @@ const Projects = () => {
                             )}
                         </div>
                     </div>
+
+                    {/* Activity Terminal */}
+                    <GitHubActivityTerminal
+                        events={events}
+                        grid={contributionGrid}
+                        totalContributions={totalContributions}
+                        loading={eventsLoading}
+                        eventPage={eventPage}
+                        totalEventPages={totalEventPages}
+                        nextEventPage={nextEventPage}
+                        prevEventPage={prevEventPage}
+                    />
                 </div>
             </div>
         </section>

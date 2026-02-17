@@ -195,15 +195,15 @@ const Projects = () => {
         {
             title: "Anandini's Exotica",
             desc: 'High-end E-commerce engine architected with a production-first mindset. Featuring complex state management and RESTful backend architecture.',
-            link: '#coming-soon',
-            tags: ['React 19', 'Node.js', 'Redis', 'MUI'],
-            status: 'Coming Soon'
+            link: 'https://anandinis-exotica-store.vercel.app/',
+            tags: ['React 19', 'Node.js', 'Redis', 'MUI', 'NestJS', 'MySQL', 'Vercel'],
+            status: 'Production'
         },
         {
             title: 'Open Sesame-Mail',
             desc: 'Production-grade Chrome Extension automating professional email workflows. Successfully deployed on Chrome Web Store with active users.',
             link: 'https://sesame-mail.vercel.app/welcome',
-            tags: ['React', 'Tailwind CSS', 'Extension API', 'Automation', 'Vite'],
+            tags: ['React 19', 'Tailwind CSS', 'Extension API', 'Automation', 'Vite'],
             status: 'Production'
         }
     ];

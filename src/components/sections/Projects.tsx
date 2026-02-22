@@ -205,6 +205,13 @@ const Projects = () => {
             link: 'https://sesame-mail.vercel.app/welcome',
             tags: ['React 19', 'Tailwind CSS', 'Extension API', 'Automation', 'Vite'],
             status: 'Production'
+        },
+        {
+            title: 'Obscura - Encrypted notes',
+            desc: 'A encrypted notepad which lives in your browser and you can take any information which you create with you if you have the link',
+            link: 'https://obscura-note.vercel.app/',
+            tags: ['React 19', 'Tailwind CSS', 'AES-GCM', 'Vercel'],
+            status: 'In-development'
         }
     ];
 
@@ -285,7 +292,7 @@ const Projects = () => {
                                     className={`inline-flex items-center space-x-3 font-bold transition-colors uppercase tracking-widest text-[10px] md:text-xs ${project.status === 'Coming Soon' ? 'text-white/20 cursor-not-allowed' : 'text-white hover:text-blue-400'}`}
                                     onClick={(e) => project.status === 'Coming Soon' && e.preventDefault()}
                                 >
-                                    <span>{project.status === 'Coming Soon' ? 'Coming Soon' : 'Execute System'}</span>
+                                    <span>{project.status === 'Production' ? 'Execute System' : 'Coming Soon'}</span>
                                     {project.status === 'Coming Soon' ? <Link2Off size={14} /> : <ExternalLink size={14} />}
                                 </a>
                             </div>

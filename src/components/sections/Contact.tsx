@@ -78,7 +78,7 @@ const Contact = () => {
                         </div>
 
                         <a
-                            href="/Anirban_CV_26_12_25.pdf"
+                            href="/Anirban_CV_23_02_26.pdf"
                             download
                             className="inline-block px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-blue-400 hover:text-white transition-all transform hover:scale-105"
                         >

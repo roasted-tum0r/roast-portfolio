@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Code, Crop, Bot } from 'lucide-react';
+import { Code, Crop, Bot, Layers, Network, Zap } from 'lucide-react';
 
 const Services = () => {
     const services = [
@@ -17,6 +17,21 @@ const Services = () => {
             icon: <Crop size={40} className="text-green-400" />,
             title: 'Legacy Modernization',
             desc: 'Transforming monolithic and legacy codebases into modern, elite-level products. Expert at refactoring complex logic, optimizing performance, and stabilization for production.'
+        },
+        {
+            icon: <Layers size={40} className="text-pink-400" />,
+            title: 'Component Architecture & State',
+            desc: 'Architecting modular, highly reusable UI component libraries paired with sophisticated global state management using Redux. Ensuring predictable data flow and strict state synchronization across enterprise applications.'
+        },
+        {
+            icon: <Network size={40} className="text-orange-400" />,
+            title: 'Distributed Frontend Systems',
+            desc: 'Exploring and implementing decoupled UI architectures using Webpack Module Federation. Dedicated to mastering cutting-edge Microfrontend patterns for scalable, multi-team ecosystem deployments.'
+        },
+        {
+            icon: <Zap size={40} className="text-yellow-400" />,
+            title: 'Performance & Optimization',
+            desc: 'Engineering lightning-fast web experiences through bundle optimization, lazy loading, and advanced algorithmic efficiency. Maximizing Core Web Vitals and minimizing infrastructure overhead.'
         }
     ];
 

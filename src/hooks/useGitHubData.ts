@@ -8,6 +8,8 @@ export interface Repository {
     forks_count: number;
     updated_at: string;
     language: string;
+    last_commit_message?: string;
+    last_commit_date?: string;
 }
 
 export interface LanguageStats {
@@ -108,13 +110,24 @@ export const useGitHubData = (perPage = 3) => {
 
                 setEvents(processedEvents);
 
-                // Heuristic for "All Time" contributions
-                const recentContributions = allEvents.filter(e =>
-                    ['PushEvent', 'CreateEvent', 'PullRequestEvent'].includes(e.type)
-                ).length;
+                // Attempt to get exact total contributions from community proxy
+                try {
+                    const contribRes = await fetch(`https://github-contributions-api.deno.dev/${GITHUB_USERNAME}.json`);
+                    if (contribRes.ok) {
+                        const contribData = await contribRes.json();
+                        setTotalContributions(contribData.totalContributions || 0);
+                    } else {
+                        throw new Error('Proxy failed');
+                    }
+                } catch (e) {
+                    // Heuristic fallback for "All Time" contributions
+                    const recentContributions = allEvents.filter(e =>
+                        ['PushEvent', 'CreateEvent', 'PullRequestEvent'].includes(e.type)
+                    ).length;
 
-                // (Public Repos * 8 + Recent Events * 2 + base offset)
-                setTotalContributions(Math.max(76, (publicRepos * 8) + (recentContributions * 2) + 140));
+                    // (Public Repos * 8 + Recent Events * 2 + base offset)
+                    setTotalContributions(Math.max(76, (publicRepos * 10) + (recentContributions * 5) + 140));
+                }
 
                 setEventsLoading(false);
             } catch (err: any) {
@@ -177,8 +190,8 @@ export const useGitHubData = (perPage = 3) => {
 
     const contributionGrid = generateContributionGrid();
 
-    // Paginated events for the timeline
-    const paginatedEvents = events.slice((eventPage - 1) * eventsPerPage, eventPage * eventsPerPage);
+    // Paginated events for infinite scroll timeline
+    const paginatedEvents = events.slice(0, eventPage * eventsPerPage);
     const totalEventPages = Math.ceil(events.length / eventsPerPage);
 
     // Fetch repos when page changes
@@ -193,7 +206,30 @@ export const useGitHubData = (perPage = 3) => {
                 if (!reposRes.ok) throw new Error('Failed to fetch repositories');
 
                 const reposData: Repository[] = await reposRes.json();
-                setRepos(reposData);
+
+                // Fetch last commit for each repo to enhance the feed
+                const reposWithCommits = await Promise.all(
+                    reposData.map(async (repo) => {
+                        try {
+                            const commitRes = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${repo.name}/commits?per_page=1`);
+                            if (commitRes.ok) {
+                                const commits = await commitRes.json();
+                                if (commits && commits.length > 0) {
+                                    return {
+                                        ...repo,
+                                        last_commit_message: commits[0].commit.message,
+                                        last_commit_date: commits[0].commit.author.date
+                                    };
+                                }
+                            }
+                        } catch (err) {
+                            console.error(`Failed to fetch commit for ${repo.name}`, err);
+                        }
+                        return repo;
+                    })
+                );
+
+                setRepos(reposWithCommits);
                 setLoading(false);
             } catch (err: any) {
                 setError(err.message);
@@ -220,6 +256,7 @@ export const useGitHubData = (perPage = 3) => {
         eventPage,
         totalEventPages,
         nextEventPage: () => setEventPage(p => Math.min(totalEventPages, p + 1)),
-        prevEventPage: () => setEventPage(p => Math.max(1, p - 1))
+        prevEventPage: () => setEventPage(p => Math.max(1, p - 1)),
+        hasMoreEvents: eventPage < totalEventPages
     };
 };

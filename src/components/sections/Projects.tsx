@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ExternalLink, Github, GitBranch, Star, Terminal, Link2Off } from 'lucide-react';
 import { useGitHubData, type Repository } from '../../hooks/useGitHubData';
@@ -7,10 +8,8 @@ const GitHubActivityTerminal = ({
     grid,
     totalContributions,
     loading,
-    eventPage,
-    totalEventPages,
     nextEventPage,
-    prevEventPage
+    hasMoreEvents
 }: {
     events: any[],
     grid: number[][],
@@ -19,8 +18,27 @@ const GitHubActivityTerminal = ({
     eventPage: number,
     totalEventPages: number,
     nextEventPage: () => void,
-    prevEventPage: () => void
+    prevEventPage: () => void,
+    hasMoreEvents?: boolean
 }) => {
+    const observerTarget = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && hasMoreEvents && !loading) {
+                    nextEventPage();
+                }
+            },
+            { threshold: 0.1 }
+        );
+
+        if (observerTarget.current) {
+            observer.observe(observerTarget.current);
+        }
+
+        return () => observer.disconnect();
+    }, [hasMoreEvents, loading, nextEventPage]);
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -89,25 +107,11 @@ const GitHubActivityTerminal = ({
                             <span>Activity Timeline</span>
                         </h3>
                         <div className="flex items-center space-x-2 bg-white/5 p-1 rounded-lg border border-white/10">
-                            <button
-                                onClick={prevEventPage}
-                                disabled={loading || eventPage === 1}
-                                className="px-3 py-1 text-[9px] font-mono text-white/40 hover:text-white disabled:opacity-20 transition-all font-bold tracking-widest"
-                            >
-                                PREV
-                            </button>
-                            <span className="text-[9px] font-mono text-blue-500/60 px-2">PG_{eventPage.toString().padStart(2, '0')}</span>
-                            <button
-                                onClick={nextEventPage}
-                                disabled={loading || eventPage >= totalEventPages}
-                                className="px-3 py-1 text-[9px] font-mono text-white/40 hover:text-white disabled:opacity-20 transition-all font-bold tracking-widest"
-                            >
-                                NEXT
-                            </button>
+                            <span className="text-[9px] font-mono text-blue-500/60 px-2 uppercase shadow-[0_0_8px_rgba(59,130,246,0.2)]">Live Data Feed</span>
                         </div>
                     </div>
 
-                    <div className="relative pl-10 space-y-4">
+                    <div className="relative pl-10 space-y-4 max-h-[480px] overflow-y-auto pr-2 scrollbar-hide">
                         {/* Vertical Timeline Line */}
                         <div className="absolute left-[20px] top-4 bottom-4 w-[2px] bg-gradient-to-b from-blue-500/20 via-blue-500/10 to-transparent"></div>
 
@@ -166,6 +170,17 @@ const GitHubActivityTerminal = ({
                                 );
                             })
                         )}
+                        {/* Intersection Observer Target */}
+                        {hasMoreEvents && (
+                            <div ref={observerTarget} className="h-8 w-full flex items-center justify-center">
+                                <span className="w-4 h-4 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></span>
+                            </div>
+                        )}
+                        {!hasMoreEvents && !loading && (
+                            <div className="text-center py-4 text-[10px] font-mono text-white/20 uppercase tracking-widest">
+                                --- End of Feed ---
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -188,7 +203,8 @@ const Projects = () => {
         eventPage,
         totalEventPages,
         nextEventPage,
-        prevEventPage
+        prevEventPage,
+        hasMoreEvents
     } = useGitHubData(3);
 
     const featuredProjects = [
@@ -410,6 +426,26 @@ const Projects = () => {
                                         <p className="text-white/40 text-sm line-clamp-2 leading-relaxed mb-4">
                                             {repo.description || 'No description provided for this system architecture module.'}
                                         </p>
+                                        
+                                        {repo.last_commit_message && (
+                                            <div className="mb-4 bg-black/40 p-3 rounded-lg border border-white/5 group-hover:border-blue-500/20 transition-colors">
+                                                <div className="flex items-center justify-between mb-1.5">
+                                                    <div className="flex items-center space-x-2">
+                                                        <GitBranch size={10} className="text-blue-400" />
+                                                        <span className="text-[9px] font-mono text-blue-400/80 uppercase tracking-widest">Latest Commit</span>
+                                                    </div>
+                                                    {repo.last_commit_date && (
+                                                        <span className="text-[9px] font-mono text-white/20">
+                                                            {new Date(repo.last_commit_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="text-white/60 text-xs font-mono line-clamp-1 italic">
+                                                    "{repo.last_commit_message}"
+                                                </p>
+                                            </div>
+                                        )}
+
                                         <div className="flex items-center space-x-2 text-blue-500/40 group-hover:text-blue-500 transition-colors text-[10px] font-mono uppercase tracking-widest">
                                             <span>Access Repository</span>
                                             <ExternalLink size={10} />
@@ -430,6 +466,7 @@ const Projects = () => {
                         totalEventPages={totalEventPages}
                         nextEventPage={nextEventPage}
                         prevEventPage={prevEventPage}
+                        hasMoreEvents={hasMoreEvents}
                     />
                 </div>
             </div>
